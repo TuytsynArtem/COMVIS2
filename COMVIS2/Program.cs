@@ -3,11 +3,13 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace CSHttpClientSample
+
 {
     public class Caption
     {
@@ -109,33 +111,36 @@ namespace CSHttpClientSample
                 byte[] byteData = GetImageAsByteArray(imageFilePath);
 
                 // Add the byte array as an octet stream to the request body.
-                string precontentString = "";
-                using (ByteArrayContent content = new ByteArrayContent(byteData))
-                {
-                    // This example uses the "application/octet-stream" content type.
-                    // The other content types you can use are "application/json"
-                    // and "multipart/form-data".
-                    content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-
-                    // Asynchronously call the REST API method.
-                    response = await client.PostAsync(uri, content);
-                     
-                }
-               
-                precontentString = await response.Content.ReadAsStringAsync();
-                // Asynchronously get the JSON response.
-                var rateInfo = JsonConvert.DeserializeObject<RootObject>(precontentString);
-                 var score = rateInfo.description.Captions;
-
-
                 
-                // Display the JSON response.
-                Console.WriteLine("\nResponse:\n\n{0}\n", score);
+                    string precontentString = "";
+                    using (ByteArrayContent content = new ByteArrayContent(byteData))
+                    {
+                        // This example uses the "application/octet-stream" content type.
+                        // The other content types you can use are "application/json"
+                        // and "multipart/form-data".
+                        content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+
+                        // Asynchronously call the REST API method.
+                        response = await client.PostAsync(uri, content);
+
+                    }
+                
+                    precontentString = await response.Content.ReadAsStringAsync();
+                    // Asynchronously get the JSON response.
+                    var rateInfo = JsonConvert.DeserializeObject<RootObject>(precontentString);
+                    var score = rateInfo.description.Captions;
+                    var ubeitemenya = score.FirstOrDefault();
+
+                        // Display the JSON response.
+                    Console.WriteLine("\nResponse:\n\n{0}{1}\n", ubeitemenya.confidence,ubeitemenya.text);
+                    Console.ReadLine();
+               
             }
             catch (Exception e)
             {
                 Console.WriteLine("\n" + e.Message);
             }
+            
         }
         /*JToken.Parse(precontentString).ToString()*/
         /// <summary>
@@ -155,4 +160,7 @@ namespace CSHttpClientSample
             }
         }
     }
+
+
+
 }

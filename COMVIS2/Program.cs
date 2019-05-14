@@ -5,37 +5,48 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Net;
+using System.Collections.Specialized;
 
 namespace CSHttpClientSample
 
 {
+  
+
+
+    
+        
+
+    
     public class Caption
     {
-        public string text { get; set; }
-        public double confidence { get; set; }
+        public string Text { get; set; }
+        public double Confidence { get; set; }
     }
 
     public class Description
     {
-        public List<string> tags { get; set; }
+        public List<string> Tags { get; set; }
         public List<Caption> Captions { get; set; }
     }
 
     public class Metadata
     {
-        public int width { get; set; }
-        public int height { get; set; }
-        public string format { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public string Format { get; set; }
     }
 
     public class RootObject
     {
-        public Description description { get; set; }
-        public string requestId { get; set; }
-        public Metadata metadata { get; set; }
+        public Description Description { get; set; }
+        public string RequestId { get; set; }
+        public Metadata Metadata { get; set; }
     }
+    
     static class Program
     {
         // Replace <Subscription Key> with your valid subscription key.
@@ -52,8 +63,19 @@ namespace CSHttpClientSample
         const string uriBase =
             "https://westcentralus.api.cognitive.microsoft.com/vision/v2.0/analyze";
 
+        public class Translation
+        {
+            public int code { get; set; }
+            public string lang { get; set; }
+            public List<string> text { get; set; }
+
+        }
+
+
+        private static readonly HttpClient client = new HttpClient();
         static void Main()
         {
+          
             // Get the path and filename to process from the user.
             Console.WriteLine("Analyze an image:");
             Console.Write(
@@ -128,11 +150,25 @@ namespace CSHttpClientSample
                     precontentString = await response.Content.ReadAsStringAsync();
                     // Asynchronously get the JSON response.
                     var rateInfo = JsonConvert.DeserializeObject<RootObject>(precontentString);
-                    var score = rateInfo.description.Captions;
+                    var score = rateInfo.Description.Captions;
                     var ubeitemenya = score.FirstOrDefault();
 
-                        // Display the JSON response.
-                    Console.WriteLine("\nResponse:\n\n{0}{1}\n", ubeitemenya.confidence,ubeitemenya.text);
+                using (var wb = new WebClient())
+                {
+                    var data = new NameValueCollection();
+                    data["text"] = ubeitemenya.Text;
+                    data["lang"] = "ru";
+                    data["key"] = "trnsl.1.1.20190514T174406Z.861a53c2a1116740.25d439e581b296f155b0cbac30e96eb1ad039458";
+                    var response1 = wb.UploadValues("https://translate.yandex.net/api/v1.5/tr.json/translate", "POST", data);
+                    string responseInstring = Encoding.UTF8.GetString(response1);
+                    var rootObject = JsonConvert.DeserializeObject<Translation>(responseInstring);
+                    // Display the JSON response.
+                    Console.WriteLine("это {0} , в этом программа уверена на все {1} %", rootObject.text[0], Math.Round(ubeitemenya.Confidence*100));
+                    Console.ReadLine();
+
+                }
+                // Display the JSON response.
+                
                     Console.ReadLine();
                
             }

@@ -163,7 +163,7 @@ namespace CSHttpClientSample
                     string responseInstring = Encoding.UTF8.GetString(response1);
                     var rootObject = JsonConvert.DeserializeObject<Translation>(responseInstring);
                     // Display the JSON response.
-                    Console.WriteLine("это {0} , в этом программа уверена на все {1} %", rootObject.text[0], Math.Round(ubeitemenya.Confidence*100));
+                    Console.WriteLine("это {0} , в этом программа уверена на все {1} %(оригинал: {2})", rootObject.text[0], Math.Round(ubeitemenya.Confidence*100), ubeitemenya.Text);
                     Console.ReadLine();
 
                 }
